@@ -1,6 +1,6 @@
-package-lock.json
 node_modules
 dist/
+.idea
 
 baseTrie.js
 checkpoint-interface.js
