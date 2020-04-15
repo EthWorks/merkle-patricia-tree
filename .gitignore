@@ -1,15 +1,3 @@
 node_modules
-dist/
 .idea
 
-baseTrie.js
-checkpoint-interface.js
-index.js
-prioritizedTaskExecutor.js
-proof.js
-readStream.js
-secure-interface.js
-secure.js
-scratchReadStream.js
-trieNode.js
-util.js
