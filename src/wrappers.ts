@@ -87,6 +87,10 @@ class WrappedCheckpointTrie extends CheckpointTrie {
   async commit(cb?: Callback<void>): Promise<void> {
     return wrapEmptyPromise(super.commit(), cb)
   }
+
+  async revert(cb?: Callback<void>): Promise<void> {
+    return wrapEmptyPromise(super.revert(), cb)
+  }
 }
 
 class WrappedSecureTrie extends SecureTrie {}
