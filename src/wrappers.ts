@@ -1,6 +1,21 @@
 import { CheckpointTrie } from './checkpointTrie'
 import { SecureTrie } from './secure-original'
 
+function wrapEmptyPromise(promise: Promise<void>, cb?: (err: any) => void) {
+  return promise.then(
+    () => {
+      cb?.(null)
+    },
+    (err) => {
+      if (cb) {
+        cb(err)
+      } else {
+        throw err
+      }
+    },
+  )
+}
+
 class WrappedCheckpointTrie extends CheckpointTrie {
   async get(key: Buffer, cb?: (err: any, value: Buffer | null) => void): Promise<Buffer | null> {
     return super.get(key).then(
@@ -20,33 +35,11 @@ class WrappedCheckpointTrie extends CheckpointTrie {
   }
 
   async put(key: Buffer, value: Buffer, cb?: (err: any) => void): Promise<void> {
-    return super.put(key, value).then(
-      () => {
-        cb?.(null)
-      },
-      (err) => {
-        if (cb) {
-          cb(err)
-        } else {
-          throw err
-        }
-      },
-    )
+    return wrapEmptyPromise(super.put(key, value), cb)
   }
 
   async commit(cb?: (err: any) => void): Promise<void> {
-    return super.commit().then(
-      () => {
-        cb?.(null)
-      },
-      (err) => {
-        if (cb) {
-          cb(err)
-        } else {
-          throw err
-        }
-      },
-    )
+    return wrapEmptyPromise(super.commit(), cb)
   }
 }
 
