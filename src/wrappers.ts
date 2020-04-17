@@ -68,6 +68,10 @@ class WrappedCheckpointTrie extends CheckpointTrie {
     return wrapPromise(this.db.get(key), cb)
   }
 
+  async putRaw(key: Buffer | string, value: Buffer, cb?: Callback<void>): Promise<void> {
+    return wrapEmptyPromise(this.db.put(toBuffer(key), value), cb)
+  }
+
   copy(includeCheckpoints: boolean = true): WrappedCheckpointTrie {
     const db = this._mainDB.copy()
     const trie = new WrappedCheckpointTrie(db._leveldb, this.root)
