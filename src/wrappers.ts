@@ -19,11 +19,25 @@ class WrappedCheckpointTrie extends CheckpointTrie {
     )
   }
 
+  async put(key: Buffer, value: Buffer, cb?: (err: any) => void): Promise<void> {
+    return super.put(key, value).then(
+      () => {
+        cb?.(null)
+      },
+      (err) => {
+        if (cb) {
+          cb(err)
+        } else {
+          throw err
+        }
+      },
+    )
+  }
+
   async commit(cb?: (err: any) => void): Promise<void> {
     return super.commit().then(
-      (value) => {
+      () => {
         cb?.(null)
-        return value
       },
       (err) => {
         if (cb) {
