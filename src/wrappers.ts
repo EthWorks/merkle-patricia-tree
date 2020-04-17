@@ -95,7 +95,7 @@ class WrappedCheckpointTrie extends CheckpointTrie {
 
 class WrappedSecureTrie extends SecureTrie {
   async get(key: Buffer | string, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
-    return wrapPromise(super.get(toBuffer(key)), cb)
+    return wrapPromise(super.get(key as Buffer), cb)
   }
 
   async put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>): Promise<void> {
@@ -109,11 +109,11 @@ class WrappedSecureTrie extends SecureTrie {
     } else {
       val = value
     }
-    return wrapEmptyPromise(super.put(toBuffer(key), val), cb)
+    return wrapEmptyPromise(super.put(key as Buffer, val), cb)
   }
 
   async del(key: Buffer | string, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(super.del(toBuffer(key)), cb)
+    return wrapEmptyPromise(super.del(key as Buffer), cb)
   }
 
   async getRaw(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
