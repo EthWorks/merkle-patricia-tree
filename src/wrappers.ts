@@ -1,5 +1,7 @@
 import { CheckpointTrie } from './checkpointTrie'
 import { SecureTrie } from './secure-original'
+import { toBuffer } from 'ethereumjs-util'
+const ethjsUtil = require('ethjs-util')
 
 type Callback<T> = (err: any, value: T) => void
 
@@ -36,20 +38,30 @@ function wrapPromise<T>(promise: Promise<T | null>, cb?: Callback<T | null>): Pr
 }
 
 class WrappedCheckpointTrie extends CheckpointTrie {
-  async get(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
-    return wrapPromise(super.get(key), cb)
+  async get(key: Buffer | string, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
+    return wrapPromise(super.get(toBuffer(key)), cb)
   }
 
-  async put(key: Buffer, value: Buffer, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(super.put(key, value), cb)
+  async put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>): Promise<void> {
+    let val;
+    if (typeof value === 'string') {
+      if(ethjsUtil.isHexString(value)) {
+        val = toBuffer(value)
+      } else {
+        val = value as any; // hack to make the tests work
+      }
+    } else {
+      val = value;
+    }
+    return wrapEmptyPromise(super.put(toBuffer(key), val), cb)
   }
 
   async commit(cb?: Callback<void>): Promise<void> {
     return wrapEmptyPromise(super.commit(), cb)
   }
 
-  async del(key: Buffer, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(super.del(key), cb)
+  async del(key: Buffer | string, cb?: Callback<void>): Promise<void> {
+    return wrapEmptyPromise(super.del(toBuffer(key)), cb)
   }
 
   async getRaw(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
