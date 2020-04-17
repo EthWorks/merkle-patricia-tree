@@ -3,16 +3,36 @@ import { SecureTrie } from './secure-original'
 
 class WrappedCheckpointTrie extends CheckpointTrie {
   async commit(cb?: (err: any) => void): Promise<void> {
-    try {
-      await super.commit()
-      cb?.(null)
-    } catch (e) {
-      if (cb) {
-        cb(e)
-      } else {
-        throw e
-      }
-    }
+    return super.commit().then(
+      (value) => {
+        cb?.(null)
+        return value
+      },
+      (err) => {
+        if (cb) {
+          cb(err)
+        } else {
+          throw err
+        }
+      },
+    )
+  }
+
+  async get(key: Buffer, cb?: (err: any, value: Buffer | null) => void): Promise<Buffer | null> {
+    return super.get(key).then(
+      (value) => {
+        cb?.(null, value)
+        return value
+      },
+      (err) => {
+        if (cb) {
+          cb(err, null)
+          return undefined as any
+        } else {
+          throw err
+        }
+      },
+    )
   }
 }
 
