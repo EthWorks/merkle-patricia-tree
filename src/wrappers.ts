@@ -43,15 +43,15 @@ class WrappedCheckpointTrie extends CheckpointTrie {
   }
 
   async put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>): Promise<void> {
-    let val;
+    let val
     if (typeof value === 'string') {
-      if(ethjsUtil.isHexString(value)) {
+      if (ethjsUtil.isHexString(value)) {
         val = toBuffer(value)
       } else {
-        val = value as any; // hack to make the tests work
+        val = value as any // hack to make the tests work
       }
     } else {
-      val = value;
+      val = value
     }
     return wrapEmptyPromise(super.put(toBuffer(key), val), cb)
   }
