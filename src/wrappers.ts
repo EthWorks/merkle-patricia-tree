@@ -1,6 +1,7 @@
 import { CheckpointTrie } from './checkpointTrie'
 import { SecureTrie } from './secure-original'
 import { toBuffer } from 'ethereumjs-util'
+
 const ethjsUtil = require('ethjs-util')
 
 type Callback<T> = (err: any, value: T) => void
@@ -81,6 +82,10 @@ class WrappedCheckpointTrie extends CheckpointTrie {
       trie.db = trie._scratch
     }
     return trie
+  }
+
+  async checkRoot(root: Buffer, cb?: Callback<boolean | null>): Promise<boolean> {
+    return wrapPromise(super.checkRoot(root), cb).then((value) => !!value)
   }
 }
 
