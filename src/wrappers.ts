@@ -57,10 +57,6 @@ class WrappedCheckpointTrie extends CheckpointTrie {
     return wrapEmptyPromise(super.put(toBuffer(key), val), cb)
   }
 
-  async commit(cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(super.commit(), cb)
-  }
-
   async del(key: Buffer | string, cb?: Callback<void>): Promise<void> {
     return wrapEmptyPromise(super.del(toBuffer(key)), cb)
   }
@@ -86,6 +82,10 @@ class WrappedCheckpointTrie extends CheckpointTrie {
 
   async checkRoot(root: Buffer, cb?: Callback<boolean | null>): Promise<boolean> {
     return wrapPromise(super.checkRoot(root), cb).then((value) => !!value)
+  }
+
+  async commit(cb?: Callback<void>): Promise<void> {
+    return wrapEmptyPromise(super.commit(), cb)
   }
 }
 
