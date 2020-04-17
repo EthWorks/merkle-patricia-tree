@@ -1,0 +1,10 @@
+name: Lint
+on: push
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v1
+      - run: yarn
+      - run: yarn lint
