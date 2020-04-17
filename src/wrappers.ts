@@ -1,10 +1,9 @@
 import { CheckpointTrie } from './checkpointTrie'
 import { SecureTrie } from './secure-original'
 
-type EmptyCallback = (err: any) => void
-type BufferCallback = (err: any, value: Buffer | null) => void
+type Callback<T> = (err: any, value: T) => void
 
-function wrapEmptyPromise(promise: Promise<void>, cb?: EmptyCallback): Promise<void> {
+function wrapEmptyPromise(promise: Promise<void>, cb?: Callback<void>): Promise<void> {
   return promise.then(
     () => {
       cb?.(null)
@@ -19,10 +18,7 @@ function wrapEmptyPromise(promise: Promise<void>, cb?: EmptyCallback): Promise<v
   )
 }
 
-function wrapBufferPromise(
-  promise: Promise<Buffer | null>,
-  cb?: BufferCallback,
-): Promise<Buffer | null> {
+function wrapPromise<T>(promise: Promise<T | null>, cb?: Callback<T | null>): Promise<T | null> {
   return promise.then(
     (value) => {
       cb?.(null, value)
@@ -40,24 +36,24 @@ function wrapBufferPromise(
 }
 
 class WrappedCheckpointTrie extends CheckpointTrie {
-  async get(key: Buffer, cb?: BufferCallback): Promise<Buffer | null> {
-    return wrapBufferPromise(super.get(key), cb)
+  async get(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
+    return wrapPromise(super.get(key), cb)
   }
 
-  async put(key: Buffer, value: Buffer, cb?: EmptyCallback): Promise<void> {
+  async put(key: Buffer, value: Buffer, cb?: Callback<void>): Promise<void> {
     return wrapEmptyPromise(super.put(key, value), cb)
   }
 
-  async commit(cb?: EmptyCallback): Promise<void> {
+  async commit(cb?: Callback<void>): Promise<void> {
     return wrapEmptyPromise(super.commit(), cb)
   }
 
-  async del(key: Buffer, cb?: EmptyCallback): Promise<void> {
+  async del(key: Buffer, cb?: Callback<void>): Promise<void> {
     return wrapEmptyPromise(super.del(key), cb)
   }
 
-  async getRaw(key: Buffer, cb?: BufferCallback): Promise<Buffer | null> {
-    return wrapBufferPromise(this.db.get(key), cb)
+  async getRaw(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
+    return wrapPromise(this.db.get(key), cb)
   }
 
   copy(includeCheckpoints: boolean = true): WrappedCheckpointTrie {
