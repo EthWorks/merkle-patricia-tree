@@ -22,8 +22,10 @@
     "formatTest": "node ./scripts/formatTest",
     "tsc": "ethereumjs-config-tsc",
     "test": "npm run test:node && npm run test:browser",
-    "test:browser": "karma start karma.conf.js",
-    "test:node": "tape -r ts-node/register test/*.ts | tap-prettify -"
+    "test:node": "npm run test:node:mocha && npm run test:node:tape",
+    "test:node:mocha": "mocha -r ts-node/register test/*.test.ts",
+    "test:node:tape": "tape -r ts-node/register test/*.spec.ts | tap-prettify -",
+    "test:browser": "karma start karma.conf.js"
   },
   "husky": {
     "hooks": {
