@@ -135,7 +135,7 @@ export class CheckpointTrie extends BaseTrie {
    * @private
    */
   _createScratchReadStream(scratchDb?: ScratchDB) {
-    let scratch = scratchDb || this._scratch
+    const scratch = scratchDb || this._scratch
     if (!scratch) {
       throw new Error('No scratch found to use')
     }

@@ -53,7 +53,7 @@ export class DB {
   /**
    * Writes a value directly to leveldb.
    * @param {Buffer} key The key as a `Buffer`
-   * @param {Buffer} value The value to be stored
+   * @param {Buffer} val The value to be stored
    * @returns {Promise}
    */
   async put(key: Buffer, val: Buffer): Promise<void> {
