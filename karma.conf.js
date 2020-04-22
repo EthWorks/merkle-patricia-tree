@@ -10,6 +10,7 @@ module.exports = function (config) {
       bundlerOptions: {
         entrypoints: /\.spec\.ts$/,
       },
+      tsconfig: "./tsconfig.test.json"
     },
     colors: true,
     browsers: ['FirefoxHeadless', 'ChromeHeadless'],
