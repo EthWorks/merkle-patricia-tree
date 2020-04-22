@@ -1,7 +1,7 @@
 import Semaphore from 'semaphore-async-await'
 import { LevelUp } from 'levelup'
 import { keccak, KECCAK256_RLP } from 'ethereumjs-util'
-import { DB, BatchDBOp, PutBatch } from './db'
+import { DB } from './db'
 import { TrieReadStream as ReadStream } from './readStream'
 import { PrioritizedTaskExecutor } from './prioritizedTaskExecutor'
 import { bufferToNibbles, matchingNibbleLength, doKeysMatch } from './util/nibbles'
@@ -15,6 +15,7 @@ import {
   LeafNode,
   EmbeddedNode,
 } from './trieNode'
+import { BatchDbOp, PutBatch } from './model/BatchDbOp'
 const assert = require('assert')
 
 interface Path {
@@ -302,7 +303,7 @@ export class Trie {
     keyRemainder: number[],
     stack: TrieNode[],
   ): Promise<void> {
-    const toSave: BatchDBOp[] = []
+    const toSave: BatchDbOp[] = []
     const lastNode = stack.pop()
     if (!lastNode) {
       throw new Error('Stack underflow')
@@ -504,7 +505,7 @@ export class Trie {
    * @param {Array} opStack - a stack of levelup operations to commit at the end of this funciton
    * @returns {Promise}
    */
-  async _saveStack(key: number[], stack: TrieNode[], opStack: BatchDBOp[]): Promise<void> {
+  async _saveStack(key: number[], stack: TrieNode[], opStack: BatchDbOp[]): Promise<void> {
     let lastRoot
 
     // update nodes
@@ -594,7 +595,7 @@ export class Trie {
     let lastNode = stack.pop() as TrieNode
     assert(lastNode)
     let parentNode = stack.pop()
-    const opStack: BatchDBOp[] = []
+    const opStack: BatchDbOp[] = []
 
     let key = bufferToNibbles(k)
 
@@ -667,14 +668,14 @@ export class Trie {
    * @private
    * @param {TrieNode} node - the node to format
    * @param {Boolean} topLevel - if the node is at the top level
-   * @param {BatchDBOp[]} opStack - the opStack to push the node's data
+   * @param {BatchDbOp[]} opStack - the opStack to push the node's data
    * @param {Boolean} remove - whether to remove the node (only used for CheckpointTrie)
    * @returns {Buffer | (EmbeddedNode | null)[]} - the node's hash used as the key or the rawNode
    */
   _formatNode(
     node: TrieNode,
     topLevel: boolean,
-    opStack: BatchDBOp[],
+    opStack: BatchDbOp[],
     remove: boolean = false,
   ): Buffer | (EmbeddedNode | null)[] {
     const rlpNode = node.serialize()
@@ -725,7 +726,7 @@ export class Trie {
    * @param {Array} ops
    * @returns {Promise}
    */
-  async batch(ops: BatchDBOp[]): Promise<void> {
+  async batch(ops: BatchDbOp[]): Promise<void> {
     for await (const op of ops) {
       if (op.type === 'put') {
         if (!op.value) {
