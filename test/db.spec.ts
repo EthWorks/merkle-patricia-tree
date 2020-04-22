@@ -1,5 +1,6 @@
 import * as tape from 'tape'
-import { DB, BatchDBOp } from '../src/db'
+import { DB } from '../src/db'
+import { BatchDbOp } from '../src/model/BatchDbOp'
 
 tape('DB basic functionality', (t) => {
   const db = new DB()
@@ -27,7 +28,7 @@ tape('DB basic functionality', (t) => {
     const ops = [
       { type: 'put', key: k, value: v },
       { type: 'put', key: k2, value: v2 },
-    ] as BatchDBOp[]
+    ] as BatchDbOp[]
     await db.batch(ops)
     const res = await db.get(k2)
     st.ok(v2.equals(res!))

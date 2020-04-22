@@ -1,6 +1,6 @@
 import * as tape from 'tape'
 import { CheckpointTrie } from '../src'
-import { BatchDBOp } from '../src/db'
+import { BatchDbOp } from '../src/model/BatchDbOp'
 
 tape('kv stream test', function (tester) {
   const it = tester.test
@@ -90,7 +90,7 @@ tape('kv stream test', function (tester) {
       key: Buffer.from('occupssation'),
       value: Buffer.from('Clown'),
     },
-  ] as BatchDBOp[]
+  ] as BatchDbOp[]
 
   let valObj = {} as any
   for (let op of ops) {
@@ -154,7 +154,7 @@ tape('db stream test', function (tester) {
       key: Buffer.from('color'),
       value: Buffer.from('pink'),
     },
-  ] as BatchDBOp[]
+  ] as BatchDbOp[]
 
   const expectedNodes = {
     '3c38d9aa6ad288c8e27da701e17fe99a5b67c8b12fd0469651c80494d36bc4c1': true,

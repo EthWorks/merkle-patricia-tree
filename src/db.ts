@@ -1,18 +1,9 @@
 import { LevelUp } from 'levelup'
+import { BatchDbOp } from './model/BatchDbOp'
+
 const level = require('level-mem')
 
 export const ENCODING_OPTS = { keyEncoding: 'binary', valueEncoding: 'binary' }
-
-export type BatchDBOp = PutBatch | DelBatch
-export interface PutBatch {
-  type: 'put'
-  key: Buffer
-  value: Buffer
-}
-export interface DelBatch {
-  type: 'del'
-  key: Buffer
-}
 
 /**
  * DB is a thin wrapper around the underlying levelup db,
@@ -74,7 +65,7 @@ export class DB {
    * @param {Array} opStack A stack of levelup operations
    * @returns {Promise}
    */
-  async batch(opStack: BatchDBOp[]): Promise<void> {
+  async batch(opStack: BatchDbOp[]): Promise<void> {
     await this._leveldb.batch(opStack, ENCODING_OPTS)
   }
 

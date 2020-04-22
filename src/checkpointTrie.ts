@@ -1,8 +1,9 @@
 import { Trie as BaseTrie } from './baseTrie'
 import { ScratchReadStream } from './scratchReadStream'
 import { ScratchDB } from './scratch'
-import { DB, BatchDBOp } from './db'
+import { DB } from './db'
 import { TrieNode } from './trieNode'
+import { BatchDbOp } from './model/BatchDbOp'
 const WriteStream = require('level-ws')
 
 export class CheckpointTrie extends BaseTrie {
@@ -150,11 +151,11 @@ export class CheckpointTrie extends BaseTrie {
    * @private
    * @param {TrieNode} node - the node to format
    * @param {Boolean} topLevel - if the node is at the top level
-   * @param {BatchDBOp[]} opStack - the opStack to push the node's data
+   * @param {BatchDbOp[]} opStack - the opStack to push the node's data
    * @param {Boolean} remove - whether to remove the node (only used for CheckpointTrie)
    * @returns {Buffer | (EmbeddedNode | null)[]} - the node's hash used as the key or the rawNode
    */
-  _formatNode(node: TrieNode, topLevel: boolean, opStack: BatchDBOp[], remove: boolean = false) {
+  _formatNode(node: TrieNode, topLevel: boolean, opStack: BatchDbOp[], remove: boolean = false) {
     const rlpNode = node.serialize()
 
     if (rlpNode.length >= 32 || topLevel) {
