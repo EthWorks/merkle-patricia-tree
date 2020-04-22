@@ -52,7 +52,7 @@ export class Trie {
   }
 
   static async fromProof(proofNodes: Buffer[], proofTrie?: Trie): Promise<Trie> {
-    let opStack = proofNodes.map((nodeValue) => {
+    const opStack = proofNodes.map((nodeValue) => {
       return {
         type: 'put',
         key: keccak(nodeValue),
@@ -203,8 +203,8 @@ export class Trie {
    */
   async findPath(key: Buffer): Promise<Path> {
     return new Promise(async (resolve) => {
-      let stack: TrieNode[] = []
-      let targetKey = bufferToNibbles(key)
+      const stack: TrieNode[] = []
+      const targetKey = bufferToNibbles(key)
 
       // walk trie and process nodes
       await this._walkTrie(this.root, async (nodeRef, node, keyProgress, walkController) => {
@@ -309,7 +309,7 @@ export class Trie {
     }
 
     // add the new nodes
-    let key = bufferToNibbles(k)
+    const key = bufferToNibbles(k)
 
     // Check if the last node is a leaf and the key matches to this
     let matchLeaf = false

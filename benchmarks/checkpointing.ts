@@ -6,17 +6,17 @@ const samples = 20
 
 const iterTest = async (numOfIter: number): Promise<Array<number>> => {
   return new Promise(async (resolve) => {
-    let vals = [] as any
-    let keys = [] as any
+    const vals = [] as any
+    const keys = [] as any
 
     for (let i = 0; i <= numOfIter; i++) {
       vals.push(pseudoRandomBytes(32))
       keys.push(pseudoRandomBytes(32))
     }
 
-    let hrstart = process.hrtime()
+    const hrstart = process.hrtime()
     let numOfOps = 0
-    let trie = new CheckpointTrie()
+    const trie = new CheckpointTrie()
 
     for (let i = 0; i < numOfIter; i++) {
       await trie.put(vals[i], keys[i])
@@ -33,7 +33,7 @@ const iterTest = async (numOfIter: number): Promise<Array<number>> => {
 
 const go = async () => {
   let i = 0
-  let avg = [0, 0]
+  const avg = [0, 0]
 
   while (i <= samples) {
     const hrend = await iterTest(iterations)
