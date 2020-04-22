@@ -23,9 +23,11 @@
     "tsc": "ethereumjs-config-tsc",
     "test": "npm run test:node && npm run test:browser",
     "test:node": "npm run test:node:mocha && npm run test:node:tape",
+    "test:browser": "npm run test:browser:mocha && npm run test:browser:tape",
     "test:node:mocha": "mocha -r ts-node/register test/*.test.ts",
     "test:node:tape": "tape -r ts-node/register test/*.spec.ts | tap-prettify -",
-    "test:browser": "karma start karma.conf.js"
+    "test:browser:mocha": "TEST_ENV=mocha karma start karma.conf.js",
+    "test:browser:tape": "TEST_ENV=tape karma start karma.conf.js"
   },
   "husky": {
     "hooks": {
