@@ -1,5 +1,5 @@
 import { CheckpointTrie } from './checkpointTrie'
-import { SecureTrie } from './secure-original'
+import { SecureTrie } from './secure'
 import { toBuffer } from 'ethereumjs-util'
 
 const ethjsUtil = require('ethjs-util')

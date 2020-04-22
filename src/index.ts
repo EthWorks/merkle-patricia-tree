@@ -1,5 +1,3 @@
-import { CheckpointTrie } from './wrappers'
-
+export { CheckpointTrie } from './checkpointTrie'
+export { SecureTrie } from './secure'
 export { Trie as BaseTrie } from './baseTrie'
-export * from './wrappers'
-export default CheckpointTrie
