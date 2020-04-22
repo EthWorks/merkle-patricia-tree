@@ -10,6 +10,7 @@
   "scripts": {
     "benchmarks": "npm run build && ts-node benchmarks/index.ts",
     "build": "ethereumjs-config-build",
+    "clean": "rimraf dist",
     "prepublishOnly": "npm run test && npm run build",
     "coverage": "nyc --reporter=lcov npm run test:node",
     "docs:build": "npx typedoc",
@@ -72,6 +73,7 @@
     "mocha": "^7.1.1",
     "nyc": "^15.0.0",
     "prettier": "^2.0.2",
+    "rimraf": "^3.0.2",
     "tap-prettify": "^0.0.2",
     "tape": "^4.13.2",
     "ts-node": "^8.8.1",
