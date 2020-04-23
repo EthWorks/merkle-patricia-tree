@@ -62,7 +62,7 @@ tape('testing checkpoints', function (tester) {
     t.end()
   })
 
-  it('should revert to the orginal root', async function (t) {
+  it('should revert to the original root', async function (t) {
     t.ok(trie.isCheckpoint)
     await trie.revert()
     t.equal(trie.root.toString('hex'), preRoot)
