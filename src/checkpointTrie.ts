@@ -1,18 +1,20 @@
 import { Trie as BaseTrie } from './baseTrie'
 import { ScratchReadStream } from './scratchReadStream'
-import { ScratchDB } from './scratch'
-import { DB } from './db'
 import { TrieNode } from './trieNode'
 import { BatchDbOp } from './model/BatchDbOp'
+import { MapDb } from './mapDb'
+import { MapScratchDb } from './mapScratch'
+import { MapDbWriteStream } from './mapDbWriteStream'
+
 const WriteStream = require('level-ws')
 
 export class CheckpointTrie extends BaseTrie {
-  _mainDB: DB
-  _scratch: ScratchDB | null
+  _mainDB: MapDb
+  _scratch: MapScratchDb | null
   _checkpoints: Buffer[]
 
-  constructor(...args: any) {
-    super(...args)
+  constructor(db?: MapDb | null, root?: Buffer) {
+    super(db, root)
     // Reference to main DB instance
     this._mainDB = this.db
     // DB instance used for checkpoints
@@ -39,7 +41,7 @@ export class CheckpointTrie extends BaseTrie {
     this._checkpoints.push(this.root)
 
     // Entering checkpoint mode is not necessary for nested checkpoints
-    if (!wasCheckpoint && this.isCheckpoint) {
+    if (!wasCheckpoint) {
       this._enterCpMode()
     }
   }
@@ -91,7 +93,7 @@ export class CheckpointTrie extends BaseTrie {
    */
   copy(includeCheckpoints: boolean = true): CheckpointTrie {
     const db = this._mainDB.copy()
-    const trie = new CheckpointTrie(db._leveldb, this.root)
+    const trie = new CheckpointTrie(db, this.root)
     if (includeCheckpoints && this.isCheckpoint) {
       trie._checkpoints = this._checkpoints.slice()
       trie._scratch = this._scratch!.copy()
@@ -105,7 +107,7 @@ export class CheckpointTrie extends BaseTrie {
    * @private
    */
   _enterCpMode() {
-    this._scratch = new ScratchDB(this._mainDB)
+    this._scratch = new MapScratchDb(this._mainDB)
     this.db = this._scratch
   }
 
@@ -115,13 +117,13 @@ export class CheckpointTrie extends BaseTrie {
    */
   async _exitCpMode(commitState: boolean): Promise<void> {
     return new Promise(async (resolve) => {
-      const scratch = this._scratch as ScratchDB
+      const scratch = this._scratch as MapScratchDb
       this._scratch = null
       this.db = this._mainDB
 
       if (commitState) {
         this._createScratchReadStream(scratch)
-          .pipe(WriteStream(this.db._leveldb))
+          .pipe(new MapDbWriteStream(this.db))
           .on('close', resolve)
       } else {
         process.nextTick(resolve)
@@ -135,12 +137,12 @@ export class CheckpointTrie extends BaseTrie {
    * @method createScratchReadStream
    * @private
    */
-  _createScratchReadStream(scratchDb?: ScratchDB) {
+  _createScratchReadStream(scratchDb?: MapScratchDb) {
     const scratch = scratchDb || this._scratch
     if (!scratch) {
       throw new Error('No scratch found to use')
     }
-    const trie = new BaseTrie(scratch._leveldb, this.root)
+    const trie = new BaseTrie(scratch.toMapDb(), this.root)
     trie.db = scratch
     return new ScratchReadStream(trie)
   }

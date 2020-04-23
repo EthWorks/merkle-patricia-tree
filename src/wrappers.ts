@@ -71,7 +71,7 @@ class WrappedCheckpointTrie extends CheckpointTrie {
 
   copy(includeCheckpoints: boolean = true): WrappedCheckpointTrie {
     const db = this._mainDB.copy()
-    const trie = new WrappedCheckpointTrie(db._leveldb, this.root)
+    const trie = new WrappedCheckpointTrie(db, this.root)
     if (includeCheckpoints && this.isCheckpoint) {
       trie._checkpoints = this._checkpoints.slice()
       trie._scratch = this._scratch!.copy()
@@ -126,7 +126,7 @@ class WrappedSecureTrie extends SecureTrie {
 
   copy(includeCheckpoints: boolean = true): WrappedSecureTrie {
     const db = this._mainDB.copy()
-    const trie = new WrappedSecureTrie(db._leveldb, this.root)
+    const trie = new WrappedSecureTrie(db, this.root)
     if (includeCheckpoints && this.isCheckpoint) {
       trie._checkpoints = this._checkpoints.slice()
       trie._scratch = this._scratch!.copy()

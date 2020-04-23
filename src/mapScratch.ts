@@ -19,4 +19,8 @@ export class MapScratchDb extends MapDb {
     scratch._map = this._map
     return scratch
   }
+
+  toMapDb(): MapDb {
+    return new MapDb(this._map)
+  }
 }

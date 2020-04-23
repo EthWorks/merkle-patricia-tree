@@ -27,7 +27,7 @@ export class SecureTrie extends CheckpointTrie {
   copy(): SecureTrie {
     const trie = super.copy(false)
     const db = trie.db.copy()
-    return new SecureTrie(db._leveldb, this.root)
+    return new SecureTrie(db, this.root)
   }
 
   async get(key: Buffer): Promise<Buffer | null> {
