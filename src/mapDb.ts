@@ -31,6 +31,10 @@ export class MapDb {
     }
   }
 
+  /**
+   * Returns a copy of the MapDb instance, with a reference
+   * to the **same** underlying Map instance.
+   */
   copy(): MapDb {
     return new MapDb(this._map)
   }
