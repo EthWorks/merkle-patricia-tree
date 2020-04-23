@@ -1,21 +1,21 @@
 import Semaphore from 'semaphore-async-await'
-import { LevelUp } from 'levelup'
 import { keccak, KECCAK256_RLP } from 'ethereumjs-util'
-import { DB } from './db'
 import { TrieReadStream as ReadStream } from './readStream'
 import { PrioritizedTaskExecutor } from './prioritizedTaskExecutor'
-import { bufferToNibbles, matchingNibbleLength, doKeysMatch } from './util/nibbles'
+import { bufferToNibbles, doKeysMatch, matchingNibbleLength } from './util/nibbles'
 import {
-  TrieNode,
+  BranchNode,
   decodeNode,
   decodeRawNode,
-  isRawNode,
-  BranchNode,
-  ExtensionNode,
-  LeafNode,
   EmbeddedNode,
+  ExtensionNode,
+  isRawNode,
+  LeafNode,
+  TrieNode,
 } from './trieNode'
 import { BatchDbOp, PutBatch } from './model/BatchDbOp'
+import { MapDb } from './mapDb'
+
 const assert = require('assert')
 
 interface Path {
@@ -38,14 +38,14 @@ type FoundNode = (nodeRef: Buffer, node: TrieNode, key: number[], walkController
  */
 export class Trie {
   EMPTY_TRIE_ROOT: Buffer
-  db: DB
+  db: MapDb
   protected lock: Semaphore
   private _root: Buffer
 
-  constructor(db?: LevelUp | null, root?: Buffer) {
+  constructor(db?: MapDb | null, root?: Buffer) {
     this.EMPTY_TRIE_ROOT = KECCAK256_RLP
     this.lock = new Semaphore(1)
-    this.db = db ? new DB(db) : new DB()
+    this.db = db ?? new MapDb()
     this._root = this.EMPTY_TRIE_ROOT
     if (root) {
       this.setRoot(root)
@@ -53,13 +53,15 @@ export class Trie {
   }
 
   static async fromProof(proofNodes: Buffer[], proofTrie?: Trie): Promise<Trie> {
-    const opStack = proofNodes.map((nodeValue) => {
-      return {
-        type: 'put',
-        key: keccak(nodeValue),
-        value: nodeValue,
-      } as PutBatch
-    })
+    const opStack = proofNodes.map(
+      (nodeValue): PutBatch => {
+        return {
+          type: 'put',
+          key: keccak(nodeValue),
+          value: nodeValue,
+        }
+      },
+    )
 
     if (!proofTrie) {
       proofTrie = new Trie()
@@ -74,10 +76,7 @@ export class Trie {
 
   static async prove(trie: Trie, key: Buffer): Promise<Buffer[]> {
     const { stack } = await trie.findPath(key)
-    const p = stack.map((stackElem) => {
-      return stackElem.serialize()
-    })
-    return p
+    return stack.map((stackElem) => stackElem.serialize())
   }
 
   static async verifyProof(
@@ -707,7 +706,7 @@ export class Trie {
   // and starting at the same root
   copy(): Trie {
     const db = this.db.copy()
-    return new Trie(db._leveldb, this.root)
+    return new Trie(db, this.root)
   }
 
   /**

@@ -19,7 +19,6 @@
     "lint:fix": "ethereumjs-config-lint-fix",
     "format": "ethereumjs-config-format",
     "format:fix": "ethereumjs-config-format-fix",
-    "formatTest": "node ./scripts/formatTest",
     "tsc": "ethereumjs-config-tsc",
     "test": "npm run test:node && npm run test:browser",
     "test:node": "npm run test:node:mocha && npm run test:node:tape",
