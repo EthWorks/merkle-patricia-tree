@@ -3,7 +3,7 @@ import { BatchDbOp } from './model/BatchDbOp'
 const stringify = (key: Buffer) => key.toString('binary')
 
 export class MapDb {
-  private readonly _map: Map<string, Buffer>
+  protected _map: Map<string, Buffer>
 
   constructor(map?: Map<string, Buffer>) {
     this._map = map ?? new Map()
