@@ -296,12 +296,7 @@ export class Trie {
    * @param {TrieNode[]} stack
    * @returns {Promise}
    */
-  async _updateNode(
-    k: Buffer,
-    value: Buffer,
-    keyRemainder: number[],
-    stack: TrieNode[],
-  ): Promise<void> {
+  _updateNode(k: Buffer, value: Buffer, keyRemainder: number[], stack: TrieNode[]) {
     const toSave: BatchDbOp[] = []
     const lastNode = stack.pop()
     if (!lastNode) {
@@ -392,7 +387,7 @@ export class Trie {
       }
     }
 
-    await this._saveStack(key, stack, toSave)
+    this._saveStack(key, stack, toSave)
   }
 
   /**
