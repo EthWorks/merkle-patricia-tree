@@ -504,7 +504,7 @@ export class Trie {
    * @param {Array} opStack - a stack of levelup operations to commit at the end of this funciton
    * @returns {Promise}
    */
-  async _saveStack(key: number[], stack: TrieNode[], opStack: BatchDbOp[]): Promise<void> {
+  _saveStack(key: number[], stack: TrieNode[], opStack: BatchDbOp[]) {
     let lastRoot
 
     // update nodes
@@ -530,10 +530,10 @@ export class Trie {
       this.root = lastRoot
     }
 
-    await this.db.batch(opStack)
+    this.db.batch(opStack)
   }
 
-  async _deleteNode(k: Buffer, stack: TrieNode[]): Promise<void> {
+  _deleteNode(k: Buffer, stack: TrieNode[]) {
     const processBranchNode = (
       key: number[],
       branchKey: number,
@@ -632,7 +632,7 @@ export class Trie {
       const branchNodeKey = branchNodes[0][0]
 
       // look up node
-      const foundNode = await this._lookupNode(branchNode)
+      const foundNode = this._lookupNode(branchNode)
       if (foundNode) {
         key = processBranchNode(
           key,
@@ -641,7 +641,7 @@ export class Trie {
           parentNode as TrieNode,
           stack,
         )
-        await this._saveStack(key, stack, opStack)
+        this._saveStack(key, stack, opStack)
       }
     } else {
       // simple removing a leaf and recaluclation the stack
@@ -650,7 +650,7 @@ export class Trie {
       }
 
       stack.push(lastNode)
-      await this._saveStack(key, stack, opStack)
+      this._saveStack(key, stack, opStack)
     }
   }
 
