@@ -1,7 +1,6 @@
 import Semaphore from 'semaphore-async-await'
 import { keccak, KECCAK256_RLP } from 'ethereumjs-util'
 import { TrieReadStream as ReadStream } from './readStream'
-import { PrioritizedTaskExecutor } from './prioritizedTaskExecutor'
 import { bufferToNibbles, doKeysMatch, matchingNibbleLength } from './util/nibbles'
 import {
   BranchNode,
@@ -406,40 +405,23 @@ export class Trie {
       return
     }
 
-    // The maximum pool size should be high enough to utilize
-    // the parallelizability of reading nodes from disk and
-    // low enough to utilize the prioritisation of node lookup.
-    const maxPoolSize = 500
-    const taskExecutor = new PrioritizedTaskExecutor(maxPoolSize)
-
     const processNode = (nodeRef: Buffer, node: TrieNode, key: number[] = []): void => {
       const walkController = {
         next: () => {
           if (node instanceof LeafNode) {
             return
           }
-          let children
-          if (node instanceof ExtensionNode) {
-            children = [[node.key, node.value]]
-          } else if (node instanceof BranchNode) {
-            children = node.getChildren().map((b) => [[b[0]], b[1]])
-          }
-          if (!children) {
-            // Node has no children
-            return
-          }
+          const children = node instanceof ExtensionNode
+            ? [[node.key, node.value]]
+            : node.getChildren().map((b) => [[b[0]], b[1]])
           for (const child of children) {
             const keyExtension = child[0] as number[]
             const childRef = child[1] as Buffer
             const childKey = key.concat(keyExtension)
-            const priority = childKey.length
-            taskExecutor.execute(priority, (taskCallback: Function) => {
-              const childNode = self._lookupNode(childRef)
-              taskCallback()
-              if (childNode) {
-                processNode(childRef, childNode as TrieNode, childKey)
-              }
-            })
+            const childNode = self._lookupNode(childRef)
+            if (childNode) {
+              processNode(childRef, childNode as TrieNode, childKey)
+            }
           }
         },
 
@@ -453,17 +435,13 @@ export class Trie {
           }
           const childKey = key.slice()
           childKey.push(childIndex)
-          const priority = childKey.length
-          taskExecutor.execute(priority, (taskCallback: Function) => {
-            const childNode = self._lookupNode(childRef)
-            taskCallback()
-            if (childNode) {
-              processNode(childRef as Buffer, childNode, childKey)
-            } else {
-              // could not find child node
-              return
-            }
-          })
+          const childNode = self._lookupNode(childRef)
+          if (childNode) {
+            processNode(childRef as Buffer, childNode, childKey)
+          } else {
+            // could not find child node
+            return
+          }
         },
       }
 
