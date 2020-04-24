@@ -201,6 +201,30 @@ export class Trie {
    * @returns {Promise}
    */
   async findPath(key: Buffer): Promise<Path> {
+    const stack: TrieNode[] = []
+    const targetKey = bufferToNibbles(key)
+
+    let node = this._lookupNode(this.root)
+
+    if (this.root.equals(KECCAK256_RLP) || !node) {
+      return {
+        node: null,
+        remaining: [],
+        stack,
+      }
+    }
+
+    let keyProgress = 0
+
+    while (!(node instanceof LeafNode)) {
+      stack.push(node)
+
+      if (node instanceof BranchNode) {
+      } else {
+        // node instanceof ExtensionNode
+      }
+    }
+
     return new Promise(async (resolve) => {
       const stack: TrieNode[] = []
       const targetKey = bufferToNibbles(key)
