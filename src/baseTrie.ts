@@ -187,10 +187,10 @@ export class Trie {
   }
 
   // writes a single node to dbs
-  async _putNode(node: TrieNode): Promise<void> {
+  _putNode(node: TrieNode) {
     const hash = node.hash()
     const serialized = node.serialize()
-    await this.db.put(hash, serialized)
+    this.db.put(hash, serialized)
   }
 
   /**
