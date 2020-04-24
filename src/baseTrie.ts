@@ -246,8 +246,8 @@ export class Trie {
   /*
    * Finds all nodes that store k,v values
    */
-  async _findValueNodes(onFound: FoundNode): Promise<void> {
-    await this._walkTrie(this.root, async (nodeRef, node, key, walkController) => {
+  _findValueNodes(onFound: FoundNode): void {
+    this._walkTrie(this.root, (nodeRef, node, key, walkController) => {
       let fullKey = key
 
       if (node instanceof LeafNode) {
@@ -259,7 +259,7 @@ export class Trie {
         onFound(nodeRef, node, fullKey, walkController)
       } else {
         // keep looking for value nodes
-        await walkController.next()
+        walkController.next()
       }
     })
   }
@@ -268,10 +268,10 @@ export class Trie {
    * Finds all nodes that are stored directly in the db
    * (some nodes are stored raw inside other nodes)
    */
-  async _findDbNodes(onFound: FoundNode): Promise<void> {
-    await this._walkTrie(this.root, async (nodeRef, node, key, walkController) => {
+  _findDbNodes(onFound: FoundNode): void {
+    this._walkTrie(this.root, (nodeRef, node, key, walkController) => {
       if (isRawNode(nodeRef)) {
-        await walkController.next()
+        walkController.next()
       } else {
         onFound(nodeRef, node, key, walkController)
       }
