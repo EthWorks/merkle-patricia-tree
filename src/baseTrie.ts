@@ -112,8 +112,8 @@ export class Trie {
    * @param {Buffer} key - the key to search for
    * @returns {Promise} - Returns a promise that resolves to `Buffer` if a value was found or `null` if no value was found.
    */
-  async get(key: Buffer): Promise<Buffer | null> {
-    const { node, remaining } = await this.findPath(key)
+  get(key: Buffer): Buffer | null {
+    const { node, remaining } = this.findPath(key)
     let value = null
     if (node && remaining.length === 0) {
       value = node.value

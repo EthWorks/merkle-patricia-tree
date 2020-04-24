@@ -30,10 +30,9 @@ export class SecureTrie extends CheckpointTrie {
     return new SecureTrie(db, this.root)
   }
 
-  async get(key: Buffer): Promise<Buffer | null> {
+  get(key: Buffer): Buffer | null {
     const hash = keccak256(key)
-    const value = await super.get(hash)
-    return value
+    return super.get(hash)
   }
 
   /**

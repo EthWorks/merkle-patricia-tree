@@ -39,8 +39,16 @@ function wrapPromise<T>(promise: Promise<T | null>, cb?: Callback<T | null>): Pr
 }
 
 class WrappedCheckpointTrie extends CheckpointTrie {
-  async get(key: Buffer | string, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
-    return wrapPromise(super.get(toBuffer(key)), cb)
+  get(key: Buffer | string, cb?: Callback<Buffer | null>): Buffer | null {
+    let value
+    try {
+      value = super.get(toBuffer(key))
+    } catch (e) {
+      cb?.(e, null)
+      return null
+    }
+    cb?.(null, value)
+    return value
   }
 
   put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>) {
@@ -109,8 +117,16 @@ class WrappedCheckpointTrie extends CheckpointTrie {
 }
 
 class WrappedSecureTrie extends SecureTrie {
-  async get(key: Buffer | string, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
-    return wrapPromise(super.get(key as Buffer), cb)
+  get(key: Buffer | string, cb?: Callback<Buffer | null>): Buffer | null {
+    let value
+    try {
+      value = super.get(key as Buffer)
+    } catch (e) {
+      cb?.(e, null)
+      return null
+    }
+    cb?.(null, value)
+    return value
   }
 
   put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>) {
