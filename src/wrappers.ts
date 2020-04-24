@@ -43,7 +43,7 @@ class WrappedCheckpointTrie extends CheckpointTrie {
     return wrapPromise(super.get(toBuffer(key)), cb)
   }
 
-  async put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>): Promise<void> {
+  put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>) {
     let val
     if (typeof value === 'string') {
       if (ethjsUtil.isHexString(value)) {
@@ -54,11 +54,23 @@ class WrappedCheckpointTrie extends CheckpointTrie {
     } else {
       val = value
     }
-    return wrapEmptyPromise(super.put(toBuffer(key), val), cb)
+    try {
+      super.put(toBuffer(key), val)
+    } catch (e) {
+      cb?.(e)
+      return
+    }
+    cb?.(null)
   }
 
-  async del(key: Buffer | string, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(super.del(toBuffer(key)), cb)
+  del(key: Buffer | string, cb?: Callback<void>) {
+    try {
+      super.del(toBuffer(key))
+    } catch (e) {
+      cb?.(e)
+      return
+    }
+    cb?.(null)
   }
 
   async getRaw(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
@@ -101,7 +113,7 @@ class WrappedSecureTrie extends SecureTrie {
     return wrapPromise(super.get(key as Buffer), cb)
   }
 
-  async put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>): Promise<void> {
+  put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>) {
     let val
     if (typeof value === 'string') {
       if (ethjsUtil.isHexString(value)) {
@@ -112,11 +124,23 @@ class WrappedSecureTrie extends SecureTrie {
     } else {
       val = value
     }
-    return wrapEmptyPromise(super.put(key as Buffer, val), cb)
+    try {
+      super.put(key as Buffer, val)
+    } catch (e) {
+      cb?.(e)
+      return
+    }
+    cb?.(null)
   }
 
-  async del(key: Buffer | string, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(super.del(key as Buffer), cb)
+  del(key: Buffer | string, cb?: Callback<void>) {
+    try {
+      super.del(key as Buffer)
+    } catch (e) {
+      cb?.(e)
+      return
+    }
+    cb?.(null)
   }
 
   async getRaw(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {

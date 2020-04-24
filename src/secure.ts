@@ -40,17 +40,17 @@ export class SecureTrie extends CheckpointTrie {
    * For a falsey value, use the original key
    * to avoid double hashing the key.
    */
-  async put(key: Buffer, val: Buffer): Promise<void> {
+  put(key: Buffer, val: Buffer) {
     if (!val || val.toString() === '') {
-      await this.del(key)
+      this.del(key)
     } else {
       const hash = keccak256(key)
-      await super.put(hash, val)
+      super.put(hash, val)
     }
   }
 
-  async del(key: Buffer): Promise<void> {
+  del(key: Buffer) {
     const hash = keccak256(key)
-    await super.del(hash)
+    super.del(hash)
   }
 }
