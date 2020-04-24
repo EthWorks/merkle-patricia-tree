@@ -687,7 +687,7 @@ export class Trie {
    * @returns {Promise}
    */
   async batch(ops: BatchDbOp[]): Promise<void> {
-    for await (const op of ops) {
+    for (const op of ops) {
       if (op.type === 'put') {
         if (!op.value) {
           throw new Error('Invalid batch db operation')
