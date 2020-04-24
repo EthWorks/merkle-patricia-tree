@@ -52,7 +52,7 @@ export class Trie {
     }
   }
 
-  static async fromProof(proofNodes: Buffer[], proofTrie?: Trie): Promise<Trie> {
+  static fromProof(proofNodes: Buffer[], proofTrie?: Trie): Trie {
     const opStack = proofNodes.map(
       (nodeValue): PutBatch => {
         return {
@@ -70,7 +70,7 @@ export class Trie {
       }
     }
 
-    await proofTrie.db.batch(opStack)
+    proofTrie.db.batch(opStack)
     return proofTrie
   }
 
