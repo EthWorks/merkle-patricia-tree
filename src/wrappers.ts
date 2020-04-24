@@ -62,11 +62,14 @@ class WrappedCheckpointTrie extends CheckpointTrie {
   }
 
   async getRaw(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
-    return wrapPromise(this.db.get(key), cb)
+    const value = this.db.get(key)
+    cb?.(null, value)
+    return value
   }
 
   async putRaw(key: Buffer | string, value: Buffer, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(this.db.put(toBuffer(key), value), cb)
+    this.db.put(toBuffer(key), value)
+    cb?.(null)
   }
 
   copy(includeCheckpoints: boolean = true): WrappedCheckpointTrie {
@@ -117,11 +120,14 @@ class WrappedSecureTrie extends SecureTrie {
   }
 
   async getRaw(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
-    return wrapPromise(this.db.get(key), cb)
+    const value = this.db.get(key)
+    cb?.(null, value)
+    return value
   }
 
   async putRaw(key: Buffer | string, value: Buffer, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(this.db.put(toBuffer(key), value), cb)
+    this.db.put(toBuffer(key), value)
+    cb?.(null)
   }
 
   copy(includeCheckpoints: boolean = true): WrappedSecureTrie {
