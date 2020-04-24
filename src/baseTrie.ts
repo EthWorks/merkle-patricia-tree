@@ -1,4 +1,3 @@
-import Semaphore from 'semaphore-async-await'
 import { keccak, KECCAK256_RLP } from 'ethereumjs-util'
 import { TrieReadStream as ReadStream } from './readStream'
 import { bufferToNibbles, doKeysMatch, matchingNibbleLength } from './util/nibbles'
@@ -38,12 +37,10 @@ type FoundNode = (nodeRef: Buffer, node: TrieNode, key: number[], walkController
 export class Trie {
   EMPTY_TRIE_ROOT: Buffer
   db: MapDb
-  protected lock: Semaphore
   private _root: Buffer
 
   constructor(db?: MapDb | null, root?: Buffer) {
     this.EMPTY_TRIE_ROOT = KECCAK256_RLP
-    this.lock = new Semaphore(1)
     this.db = db ?? new MapDb()
     this._root = this.EMPTY_TRIE_ROOT
     if (root) {
@@ -132,23 +129,21 @@ export class Trie {
    * @param {Buffer} value
    * @returns {Promise}
    */
-  async put(key: Buffer, value: Buffer): Promise<void> {
+  put(key: Buffer, value: Buffer) {
     // If value is empty, delete
     if (!value || value.toString() === '') {
-      return await this.del(key)
+      return this.del(key)
     }
 
-    await this.lock.wait()
     if (this.root.equals(KECCAK256_RLP)) {
       // If no root, initialize this trie
-      await this._createInitialNode(key, value)
+      this._createInitialNode(key, value)
     } else {
       // First try to find the given key or its nearest node
-      const { remaining, stack } = await this.findPath(key)
+      const { remaining, stack } = this.findPath(key)
       // then update
-      await this._updateNode(key, value, remaining, stack)
+      this._updateNode(key, value, remaining, stack)
     }
-    this.lock.signal()
   }
 
   /**
@@ -158,13 +153,11 @@ export class Trie {
    * @param {Buffer} key
    * @returns {Promise}
    */
-  async del(key: Buffer): Promise<void> {
-    await this.lock.wait()
-    const { node, stack } = await this.findPath(key)
+  del(key: Buffer) {
+    const { node, stack } = this.findPath(key)
     if (node) {
-      await this._deleteNode(key, stack)
+      this._deleteNode(key, stack)
     }
-    this.lock.signal()
   }
 
   // retrieves a node from dbs by hash
@@ -200,11 +193,11 @@ export class Trie {
    * @param {Buffer} key - the search key
    * @returns {Promise}
    */
-  async findPath(key: Buffer): Promise<Path> {
+  findPath(key: Buffer): Path {
     const stack: TrieNode[] = []
 
     const targetKey = bufferToNibbles(key)
-    let currentKey: number[] = []
+    const currentKey: number[] = []
     let node = this._lookupNode(this.root)
 
     while (node && !(node instanceof LeafNode)) {

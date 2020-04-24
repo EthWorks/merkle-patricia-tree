@@ -58,14 +58,10 @@ export class CheckpointTrie extends BaseTrie {
       throw new Error('trying to commit when not checkpointed')
     }
 
-    await this.lock.wait()
-
     this._checkpoints.pop()
     if (!this.isCheckpoint) {
       await this._exitCpMode(true)
     }
-
-    this.lock.signal()
   }
 
   /**
@@ -74,14 +70,12 @@ export class CheckpointTrie extends BaseTrie {
    * parent checkpoint as current.
    */
   async revert(): Promise<void> {
-    await this.lock.wait()
     if (this.isCheckpoint) {
       this.root = this._checkpoints.pop()!
       if (!this.isCheckpoint) {
         await this._exitCpMode(false)
       }
     }
-    this.lock.signal()
   }
 
   /**
