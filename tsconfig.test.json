@@ -1,5 +1,8 @@
 {
   "extends": "@ethereumjs/config-tsc",
+  "compilerOptions": {
+    "target": "es6"
+  },
   "include": [
     "src",
     "test"
