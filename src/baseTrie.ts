@@ -411,9 +411,10 @@ export class Trie {
           if (node instanceof LeafNode) {
             return
           }
-          const children = node instanceof ExtensionNode
-            ? [[node.key, node.value]]
-            : node.getChildren().map((b) => [[b[0]], b[1]])
+          const children =
+            node instanceof ExtensionNode
+              ? [[node.key, node.value]]
+              : node.getChildren().map((b) => [[b[0]], b[1]])
           for (const child of children) {
             const keyExtension = child[0] as number[]
             const childRef = child[1] as Buffer
