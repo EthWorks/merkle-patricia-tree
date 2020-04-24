@@ -398,96 +398,84 @@ export class Trie {
    * @param {Function} onNode - callback to call when a node is found
    * @returns {Promise} - returns when finished walking trie
    */
-  async _walkTrie(root: Buffer, onNode: FoundNode): Promise<void> {
-    return new Promise(async (resolve) => {
-      const self = this
-      root = root || this.root
+  _walkTrie(root: Buffer, onNode: FoundNode): void {
+    const self = this
+    root = root || this.root
 
-      if (root.equals(KECCAK256_RLP)) {
-        return resolve()
-      }
+    if (root.equals(KECCAK256_RLP)) {
+      return
+    }
 
-      // The maximum pool size should be high enough to utilize
-      // the parallelizability of reading nodes from disk and
-      // low enough to utilize the prioritisation of node lookup.
-      const maxPoolSize = 500
-      const taskExecutor = new PrioritizedTaskExecutor(maxPoolSize)
+    // The maximum pool size should be high enough to utilize
+    // the parallelizability of reading nodes from disk and
+    // low enough to utilize the prioritisation of node lookup.
+    const maxPoolSize = 500
+    const taskExecutor = new PrioritizedTaskExecutor(maxPoolSize)
 
-      const processNode = async (
-        nodeRef: Buffer,
-        node: TrieNode,
-        key: number[] = [],
-      ): Promise<void> => {
-        const walkController = {
-          next: async () => {
-            if (node instanceof LeafNode) {
-              if (taskExecutor.finished()) {
-                resolve()
-              }
-              return
-            }
-            let children
-            if (node instanceof ExtensionNode) {
-              children = [[node.key, node.value]]
-            } else if (node instanceof BranchNode) {
-              children = node.getChildren().map((b) => [[b[0]], b[1]])
-            }
-            if (!children) {
-              // Node has no children
-              return resolve()
-            }
-            for (const child of children) {
-              const keyExtension = child[0] as number[]
-              const childRef = child[1] as Buffer
-              const childKey = key.concat(keyExtension)
-              const priority = childKey.length
-              taskExecutor.execute(priority, async (taskCallback: Function) => {
-                const childNode = await self._lookupNode(childRef)
-                taskCallback()
-                if (childNode) {
-                  processNode(childRef, childNode as TrieNode, childKey)
-                }
-              })
-            }
-          },
-          only: async (childIndex: number) => {
-            if (!(node instanceof BranchNode)) {
-              throw new Error('Expected branch node')
-            }
-            const childRef = node.getBranch(childIndex)
-            if (!childRef) {
-              throw new Error('Could not get branch of childIndex')
-            }
-            const childKey = key.slice()
-            childKey.push(childIndex)
+    const processNode = (nodeRef: Buffer, node: TrieNode, key: number[] = []): void => {
+      const walkController = {
+        next: () => {
+          if (node instanceof LeafNode) {
+            return
+          }
+          let children
+          if (node instanceof ExtensionNode) {
+            children = [[node.key, node.value]]
+          } else if (node instanceof BranchNode) {
+            children = node.getChildren().map((b) => [[b[0]], b[1]])
+          }
+          if (!children) {
+            // Node has no children
+            return
+          }
+          for (const child of children) {
+            const keyExtension = child[0] as number[]
+            const childRef = child[1] as Buffer
+            const childKey = key.concat(keyExtension)
             const priority = childKey.length
-            taskExecutor.execute(priority, async (taskCallback: Function) => {
-              const childNode = await self._lookupNode(childRef)
+            taskExecutor.execute(priority, (taskCallback: Function) => {
+              const childNode = self._lookupNode(childRef)
               taskCallback()
               if (childNode) {
-                await processNode(childRef as Buffer, childNode, childKey)
-              } else {
-                // could not find child node
-                resolve()
+                processNode(childRef, childNode as TrieNode, childKey)
               }
             })
-          },
-        }
+          }
+        },
 
-        if (node) {
-          onNode(nodeRef, node, key, walkController)
-        } else {
-          resolve()
-        }
+        only: (childIndex: number) => {
+          if (!(node instanceof BranchNode)) {
+            throw new Error('Expected branch node')
+          }
+          const childRef = node.getBranch(childIndex)
+          if (!childRef) {
+            throw new Error('Could not get branch of childIndex')
+          }
+          const childKey = key.slice()
+          childKey.push(childIndex)
+          const priority = childKey.length
+          taskExecutor.execute(priority, (taskCallback: Function) => {
+            const childNode = self._lookupNode(childRef)
+            taskCallback()
+            if (childNode) {
+              processNode(childRef as Buffer, childNode, childKey)
+            } else {
+              // could not find child node
+              return
+            }
+          })
+        },
       }
 
-      const node = await this._lookupNode(root)
       if (node) {
-        await processNode(root, node as TrieNode, [])
-      } else {
-        resolve()
+        onNode(nodeRef, node, key, walkController)
       }
-    })
+    }
+
+    const node = this._lookupNode(root)
+    if (node) {
+      processNode(root, node, [])
+    }
   }
 
   /**
