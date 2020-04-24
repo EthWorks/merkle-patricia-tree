@@ -650,10 +650,10 @@ export class Trie {
   }
 
   // Creates the initial node from an empty tree
-  async _createInitialNode(key: Buffer, value: Buffer): Promise<void> {
+  _createInitialNode(key: Buffer, value: Buffer) {
     const newNode = new LeafNode(bufferToNibbles(key), value)
     this.root = newNode.hash()
-    await this._putNode(newNode)
+    this._putNode(newNode)
   }
 
   /**
