@@ -70,19 +70,15 @@ export class Trie {
     return proofTrie
   }
 
-  static async prove(trie: Trie, key: Buffer): Promise<Buffer[]> {
-    const { stack } = await trie.findPath(key)
+  static prove(trie: Trie, key: Buffer): Buffer[] {
+    const { stack } = trie.findPath(key)
     return stack.map((stackElem) => stackElem.serialize())
   }
 
-  static async verifyProof(
-    rootHash: Buffer,
-    key: Buffer,
-    proofNodes: Buffer[],
-  ): Promise<Buffer | null> {
+  static verifyProof(rootHash: Buffer, key: Buffer, proofNodes: Buffer[]): Buffer | null {
     let proofTrie = new Trie(null, rootHash)
     try {
-      proofTrie = await Trie.fromProof(proofNodes, proofTrie)
+      proofTrie = Trie.fromProof(proofNodes, proofTrie)
     } catch (e) {
       throw new Error('Invalid proof nodes given')
     }
