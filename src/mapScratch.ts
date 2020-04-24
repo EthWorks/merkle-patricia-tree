@@ -5,9 +5,9 @@ export class MapScratchDb extends MapDb {
     super()
   }
 
-  async get(key: Buffer): Promise<Buffer | null> {
-    const scratchValue = await super.get(key)
-    return scratchValue ?? (await this._upstream.get(key))
+  get(key: Buffer): Buffer | null {
+    const scratchValue = super.get(key)
+    return scratchValue ?? this._upstream.get(key)
   }
 
   /**

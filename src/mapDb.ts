@@ -9,19 +9,19 @@ export class MapDb {
     this._map = map ?? new Map()
   }
 
-  async get(key: Buffer): Promise<Buffer | null> {
+  get(key: Buffer): Buffer | null {
     return this._map.get(stringify(key)) ?? null
   }
 
-  async put(key: Buffer, val: Buffer): Promise<void> {
+  put(key: Buffer, val: Buffer): void {
     this._map.set(stringify(key), val)
   }
 
-  async del(key: Buffer): Promise<void> {
+  del(key: Buffer): void {
     this._map.delete(stringify(key))
   }
 
-  async batch(opStack: BatchDbOp[]): Promise<void> {
+  batch(opStack: BatchDbOp[]): void {
     for (const op of opStack) {
       if (op.type === 'put') {
         this._map.set(stringify(op.key), op.value)
