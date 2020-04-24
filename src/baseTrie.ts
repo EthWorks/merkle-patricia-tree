@@ -169,7 +169,7 @@ export class Trie {
   }
 
   // retrieves a node from dbs by hash
-  async _lookupNode(node: Buffer | Buffer[]): Promise<TrieNode | null> {
+  _lookupNode(node: Buffer | Buffer[]): TrieNode | null {
     if (isRawNode(node)) {
       return decodeRawNode(node as Buffer[])
     }
@@ -177,7 +177,7 @@ export class Trie {
     let value = null
     let foundNode = null
 
-    value = await this.db.get(node as Buffer)
+    value = this.db.get(node as Buffer)
 
     if (value) {
       foundNode = decodeNode(value)
