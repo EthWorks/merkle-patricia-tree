@@ -202,76 +202,56 @@ export class Trie {
    */
   async findPath(key: Buffer): Promise<Path> {
     const stack: TrieNode[] = []
-    const targetKey = bufferToNibbles(key)
 
+    const targetKey = bufferToNibbles(key)
+    let currentKey: number[] = []
     let node = this._lookupNode(this.root)
 
-    if (this.root.equals(KECCAK256_RLP) || !node) {
-      return {
-        node: null,
-        remaining: [],
-        stack,
-      }
-    }
-
-    let keyProgress = 0
-
-    while (!(node instanceof LeafNode)) {
+    while (node && !(node instanceof LeafNode)) {
       stack.push(node)
-
+      const keyRemainder = targetKey.slice(currentKey.length)
       if (node instanceof BranchNode) {
-      } else {
-        // node instanceof ExtensionNode
-      }
-    }
-
-    return new Promise(async (resolve) => {
-      const stack: TrieNode[] = []
-      const targetKey = bufferToNibbles(key)
-
-      // walk trie and process nodes
-      await this._walkTrie(this.root, async (nodeRef, node, keyProgress, walkController) => {
-        const keyRemainder = targetKey.slice(matchingNibbleLength(keyProgress, targetKey))
-        stack.push(node)
-
-        if (node instanceof BranchNode) {
-          if (keyRemainder.length === 0) {
-            // we exhausted the key without finding a node
-            resolve({ node, remaining: [], stack })
+        if (currentKey.length === targetKey.length) {
+          // we exhausted the key without finding a node
+          return { node, remaining: [], stack }
+        } else {
+          const branchIndex = targetKey[currentKey.length]
+          const branchNode = node.getBranch(branchIndex)
+          if (!branchNode) {
+            // there are no more nodes to find and we didn't find the key
+            return { node: null, remaining: keyRemainder, stack }
           } else {
-            const branchIndex = keyRemainder[0]
-            const branchNode = node.getBranch(branchIndex)
-            if (!branchNode) {
-              // there are no more nodes to find and we didn't find the key
-              resolve({ node: null, remaining: keyRemainder, stack })
-            } else {
-              // node found, continuing search
-              await walkController.only(branchIndex)
-            }
-          }
-        } else if (node instanceof LeafNode) {
-          if (doKeysMatch(keyRemainder, node.key)) {
-            // keys match, return node with empty key
-            resolve({ node, remaining: [], stack })
-          } else {
-            // reached leaf but keys dont match
-            resolve({ node: null, remaining: keyRemainder, stack })
-          }
-        } else if (node instanceof ExtensionNode) {
-          const matchingLen = matchingNibbleLength(keyRemainder, node.key)
-          if (matchingLen !== node.key.length) {
-            // keys don't match, fail
-            resolve({ node: null, remaining: keyRemainder, stack })
-          } else {
-            // keys match, continue search
-            await walkController.next()
+            currentKey.push(branchIndex)
+            node = this._lookupNode(branchNode)
           }
         }
-      })
+      } else {
+        // node instanceof ExtensionNode
+        const matchingLen = matchingNibbleLength(keyRemainder, node.key)
+        if (matchingLen !== node.key.length) {
+          // keys don't match, fail
+          return { node: null, remaining: keyRemainder, stack }
+        } else {
+          currentKey.push(...node.key)
+          node = this._lookupNode(node.value)
+        }
+      }
+    }
 
-      // Resolve if _walkTrie finishes without finding any nodes
-      resolve({ node: null, remaining: [], stack })
-    })
+    if (!node) {
+      return { node: null, remaining: [], stack }
+    }
+
+    stack.push(node)
+
+    const keyRemainder = targetKey.slice(currentKey.length)
+    if (doKeysMatch(keyRemainder, node.key)) {
+      // keys match, return node with empty key
+      return { node, remaining: [], stack }
+    } else {
+      // reached leaf but keys dont match
+      return { node: null, remaining: keyRemainder, stack }
+    }
   }
 
   /*
