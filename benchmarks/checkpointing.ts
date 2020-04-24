@@ -15,11 +15,11 @@ async function iterTest(numOfIter: number): Promise<bigint> {
 
   const trie = new CheckpointTrie()
 
-  return measureExecution(async () => {
+  return measureExecution(() => {
     for (let i = 0; i < numOfIter; ++i) {
-      await trie.put(vals[i], keys[i])
+      trie.put(vals[i], keys[i])
       trie.checkpoint()
-      await trie.get(randomKey)
+      trie.get(randomKey)
     }
   })
 }
