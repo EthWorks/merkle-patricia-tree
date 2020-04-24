@@ -676,19 +676,19 @@ export class Trie {
    *  , { type: 'put', key: Buffer.from('spouse'), value: Buffer.from('Kim Young-sook') }
    *  , { type: 'put', key: Buffer.from('occupation'), value: Buffer.from('Clown') }
    * ]
-   * await trie.batch(ops)
+   * trie.batch(ops)
    * @param {Array} ops
    * @returns {Promise}
    */
-  async batch(ops: BatchDbOp[]): Promise<void> {
+  batch(ops: BatchDbOp[]) {
     for (const op of ops) {
       if (op.type === 'put') {
         if (!op.value) {
           throw new Error('Invalid batch db operation')
         }
-        await this.put(op.key, op.value)
+        this.put(op.key, op.value)
       } else if (op.type === 'del') {
-        await this.del(op.key)
+        this.del(op.key)
       }
     }
   }
@@ -696,8 +696,8 @@ export class Trie {
   /**
    * Checks if a given root exists.
    */
-  async checkRoot(root: Buffer): Promise<boolean> {
-    const value = await this._lookupNode(root)
+  checkRoot(root: Buffer): boolean {
+    const value = this._lookupNode(root)
     return !!value
   }
 }

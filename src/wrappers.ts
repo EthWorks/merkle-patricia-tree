@@ -103,8 +103,16 @@ class WrappedCheckpointTrie extends CheckpointTrie {
     return trie
   }
 
-  async checkRoot(root: Buffer, cb?: Callback<boolean | null>): Promise<boolean> {
-    return wrapPromise(super.checkRoot(root), cb).then((value) => !!value)
+  checkRoot(root: Buffer, cb?: Callback<boolean | null>): boolean {
+    let value: boolean
+    try {
+      value = super.checkRoot(root)
+    } catch (e) {
+      cb?.(e, null)
+      return false
+    }
+    cb?.(null, value)
+    return value
   }
 
   async commit(cb?: Callback<void>): Promise<void> {
@@ -181,8 +189,16 @@ class WrappedSecureTrie extends SecureTrie {
     return trie
   }
 
-  async checkRoot(root: Buffer, cb?: Callback<boolean | null>): Promise<boolean> {
-    return wrapPromise(super.checkRoot(root), cb).then((value) => !!value)
+  checkRoot(root: Buffer, cb?: Callback<boolean | null>): boolean {
+    let value: boolean
+    try {
+      value = super.checkRoot(root)
+    } catch (e) {
+      cb?.(e, null)
+      return false
+    }
+    cb?.(null, value)
+    return value
   }
 
   async commit(cb?: Callback<void>): Promise<void> {
