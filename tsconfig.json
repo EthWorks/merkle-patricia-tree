@@ -1,4 +1,7 @@
 {
   "extends": "@ethereumjs/config-tsc",
+  "compilerOptions": {
+    "target": "ES2017"
+  },
   "include": ["src/**/*.ts"]
 }
