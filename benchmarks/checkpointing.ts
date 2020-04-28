@@ -5,7 +5,7 @@ import { formatTime } from './utils/formatTime'
 import { average, std } from './utils/metrics'
 
 const iterations = 5000
-const samples = 20
+const samples = 50
 const printSampleTimes = true
 
 async function iterTest(numOfIter: number): Promise<bigint> {

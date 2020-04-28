@@ -8,7 +8,6 @@
     "dist/**/*"
   ],
   "scripts": {
-    "benchmarks": "npm run build && ts-node benchmarks/index.ts",
     "build": "ethereumjs-config-build",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
@@ -26,7 +25,8 @@
     "test:node:mocha": "mocha -r ts-node/register test/*.test.ts",
     "test:node:tape": "tape -r ts-node/register test/*.spec.ts | tap-prettify -",
     "test:browser:mocha": "TEST_ENV=mocha karma start karma.conf.js",
-    "test:browser:tape": "TEST_ENV=tape karma start karma.conf.js"
+    "test:browser:tape": "TEST_ENV=tape karma start karma.conf.js",
+    "benchmarks": "rimraf dist-benchmarks && tsc -p tsconfig.bench.json && node dist-banchmarks/checkpointing.js"
   },
   "husky": {
     "hooks": {
