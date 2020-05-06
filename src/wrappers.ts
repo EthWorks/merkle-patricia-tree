@@ -2,8 +2,6 @@ import { CheckpointTrie } from './checkpointTrie'
 import { SecureTrie } from './secure'
 import { toBuffer } from 'ethereumjs-util'
 
-const ethjsUtil = require('ethjs-util')
-
 type Callback<T> = (err: any, value: T) => void
 
 function wrapEmptyPromise(promise: Promise<void>, cb?: Callback<void>): Promise<void> {
@@ -44,17 +42,7 @@ class WrappedCheckpointTrie extends CheckpointTrie {
   }
 
   async put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>): Promise<void> {
-    let val
-    if (typeof value === 'string') {
-      if (ethjsUtil.isHexString(value)) {
-        val = toBuffer(value)
-      } else {
-        val = value as any // hack to make the tests work
-      }
-    } else {
-      val = value
-    }
-    return wrapEmptyPromise(super.put(toBuffer(key), val), cb)
+    return wrapEmptyPromise(super.put(toBuffer(key), toBuffer(value)), cb)
   }
 
   async del(key: Buffer | string, cb?: Callback<void>): Promise<void> {
@@ -62,11 +50,11 @@ class WrappedCheckpointTrie extends CheckpointTrie {
   }
 
   async getRaw(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
-    return wrapPromise(this.db.get(key), cb)
+    return wrapPromise(this.db.get(toBuffer(key)), cb)
   }
 
   async putRaw(key: Buffer | string, value: Buffer, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(this.db.put(toBuffer(key), value), cb)
+    return wrapEmptyPromise(this.db.put(toBuffer(key), toBuffer(value)), cb)
   }
 
   copy(includeCheckpoints: boolean = true): WrappedCheckpointTrie {
@@ -81,7 +69,7 @@ class WrappedCheckpointTrie extends CheckpointTrie {
   }
 
   async checkRoot(root: Buffer, cb?: Callback<boolean | null>): Promise<boolean> {
-    return wrapPromise(super.checkRoot(root), cb).then((value) => !!value)
+    return wrapPromise(super.checkRoot(toBuffer(root)), cb).then((value) => !!value)
   }
 
   async commit(cb?: Callback<void>): Promise<void> {
@@ -95,33 +83,23 @@ class WrappedCheckpointTrie extends CheckpointTrie {
 
 class WrappedSecureTrie extends SecureTrie {
   async get(key: Buffer | string, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
-    return wrapPromise(super.get(key as Buffer), cb)
+    return wrapPromise(super.get(toBuffer(key)), cb)
   }
 
   async put(key: Buffer | string, value: Buffer | string, cb?: Callback<void>): Promise<void> {
-    let val
-    if (typeof value === 'string') {
-      if (ethjsUtil.isHexString(value)) {
-        val = toBuffer(value)
-      } else {
-        val = value as any // hack to make the tests work
-      }
-    } else {
-      val = value
-    }
-    return wrapEmptyPromise(super.put(key as Buffer, val), cb)
+    return wrapEmptyPromise(super.put(toBuffer(key), toBuffer(value)), cb)
   }
 
   async del(key: Buffer | string, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(super.del(key as Buffer), cb)
+    return wrapEmptyPromise(super.del(toBuffer(key)), cb)
   }
 
   async getRaw(key: Buffer, cb?: Callback<Buffer | null>): Promise<Buffer | null> {
-    return wrapPromise(this.db.get(key), cb)
+    return wrapPromise(this.db.get(toBuffer(key)), cb)
   }
 
   async putRaw(key: Buffer | string, value: Buffer, cb?: Callback<void>): Promise<void> {
-    return wrapEmptyPromise(this.db.put(toBuffer(key), value), cb)
+    return wrapEmptyPromise(this.db.put(toBuffer(key), toBuffer(value)), cb)
   }
 
   copy(includeCheckpoints: boolean = true): WrappedSecureTrie {
@@ -136,7 +114,7 @@ class WrappedSecureTrie extends SecureTrie {
   }
 
   async checkRoot(root: Buffer, cb?: Callback<boolean | null>): Promise<boolean> {
-    return wrapPromise(super.checkRoot(root), cb).then((value) => !!value)
+    return wrapPromise(super.checkRoot(toBuffer(root)), cb).then((value) => !!value)
   }
 
   async commit(cb?: Callback<void>): Promise<void> {
