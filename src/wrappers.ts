@@ -2,8 +2,8 @@ import { CheckpointTrie } from './checkpointTrie'
 import { SecureTrie } from './secure'
 import { toBuffer } from 'ethereumjs-util'
 import { BaseTrie } from './index'
-import { BatchDBOp } from './db'
-import { ScratchDB } from './scratch'
+import { BatchDbOp } from './model/BatchDbOp'
+import { MapScratchDb } from './mapScratch'
 
 type Callback<T> = (err: any, value: T) => void
 
@@ -121,11 +121,11 @@ class WrappedCheckpointTrie extends CheckpointTrie {
     return wrapEmptyPromise(super.revert(), cb)
   }
 
-  async batch(ops: BatchDBOp[], cb?: Callback<void>): Promise<void> {
+  async batch(ops: BatchDbOp[], cb?: Callback<void>): Promise<void> {
     return wrapEmptyPromise(super.batch(ops), cb)
   }
 
-  createScratchReadStream(scratchDb?: ScratchDB) {
+  createScratchReadStream(scratchDb?: MapScratchDb) {
     return super._createScratchReadStream(scratchDb)
   }
 }
@@ -206,11 +206,11 @@ class WrappedSecureTrie extends SecureTrie {
     return wrapEmptyPromise(super.revert(), cb)
   }
 
-  async batch(ops: BatchDBOp[], cb?: Callback<void>): Promise<void> {
+  async batch(ops: BatchDbOp[], cb?: Callback<void>): Promise<void> {
     return wrapEmptyPromise(super.batch(ops), cb)
   }
 
-  createScratchReadStream(scratchDb?: ScratchDB) {
+  createScratchReadStream(scratchDb?: MapScratchDb) {
     return super._createScratchReadStream(scratchDb)
   }
 }
